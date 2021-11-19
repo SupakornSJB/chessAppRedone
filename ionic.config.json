@@ -1,0 +1,7 @@
+{
+  "name": "ChessApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
