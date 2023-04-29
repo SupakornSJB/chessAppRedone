@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Blank
+      ChessApp
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,12 +9,285 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title size="large">ChessApp</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
+  <ion-card>
+    <ion-card-header>
+      <ion-label><h1>Welcome to ChessApp!</h1></ion-label>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-button expand="block" fill="outline" (click) = "menuSelector(true, false, false, false)">Search game</ion-button>
+      <ion-button expand="block" fill="outline" (click) = "menuSelector(false, false, false, true)">See Opening Data</ion-button>
+      <ion-button expand="block" fill="outline" (click) = "menuSelector(false, true, false, false)">See watchlist</ion-button>
+      <ion-button expand="block" fill="outline" (click) = "menuSelector(false, false, true, false)">Add new game to watchlist</ion-button>
+      
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf = "!SWLbool && !IWLbool && !SGbool && !OPDbool">
+    <ion-card-content>
+      <ion-label>
+        <b>ChessApp</b> uses the datasets from this link:<br><b><br>https://www.kaggle.com/mysarahmadbhat/online-chess-games <br></b><br>
+        which contains more than 20,000 chess games from the online platform lichess.org
+      </ion-label>
+    </ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf = "(SWLbool)">
+    <ion-card>
+      <ion-card-content>
+        <ion-label><b>Please note:</b> Watchlists may take a few seconds to load.</ion-label>
+      </ion-card-content>
+    </ion-card>
+    <ion-card *ngFor = "let item of watchlist">
+      <ion-card-content>
+        <ion-label><b>Match title:</b> {{item.match_title}}</ion-label><br>
+        <ion-label><b>Date:</b> {{item.day}} {{item.month}} {{item.year}}</ion-label><br>
+        <ion-label><b>Time:</b> {{item.time}}</ion-label><br>
+        <ion-label><b>Tournament:</b> {{item.tournament}}</ion-label><br>
+        <ion-label><b>Location:</b> {{item.where}}</ion-label><br>
+        <ion-label><b>Status:</b> {{item.status}}</ion-label><br>
+      </ion-card-content>
+
+      <ion-button expand="block" fill="outline" (click) = "updateWatchListStatus(item.id)" *ngIf = "item.status == 'Unwatched'">Watched!</ion-button>
+      <ion-button expand="block" fill="outline" (click) = "deleteWatchList(item.id)">Delete this</ion-button>
+    </ion-card>
+  </ng-container>
+
+  <ion-card *ngIf = "(SWLbool && watchlist.length == 0)">
+    <ion-card-content>
+        <ion-label><b>No item in watchlist</b></ion-label><br>
+    </ion-card-content>
+  </ion-card>
+  
+  <ng-container>
+    <ion-card *ngIf = "IWLbool">
+      <ion-card-content>
+        <ion-label><h1><b>Watch Information</b></h1></ion-label><br>
+        <ion-input placeholder="Enter match title" [(ngModel)] = "watchListInp['match_title']"></ion-input>
+        <ion-input placeholder="Enter tournament" [(ngModel)] = "watchListInp['tour']"></ion-input>
+        <ion-input placeholder="Enter location" [(ngModel)] = "watchListInp['where']"></ion-input>
+        <br><ion-label><h2><b>Date</b></h2></ion-label><br>
+        <ion-list>
+          <ion-item>
+            <ion-label>Day</ion-label>
+            <ion-select placeholder = "Select Day" [(ngModel)] = "watchListInp['day']">
+              <ion-select-option value="Unspecified">Unspecified</ion-select-option>
+              <div *ngFor = "let t of datetimeInp['day31']"><ion-select-option value="{{t}}">{{t}}</ion-select-option></div>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label>Month</ion-label>
+            <ion-select placeholder = "Select Month" [(ngModel)] = "watchListInp['month']">
+              <ion-select-option value="Unspecified">Unspecified</ion-select-option>
+              <div *ngFor = "let t of datetimeInp['month']"><ion-select-option value="{{t}}">{{t}}</ion-select-option></div>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label>Year</ion-label>
+            <ion-select placeholder = "Select Year" [(ngModel)] = "watchListInp['year']">
+              <ion-select-option value="Unspecified">Unspecified</ion-select-option>
+              <div *ngFor = "let t of datetimeInp['year']"><ion-select-option value="{{t}}">{{t}}</ion-select-option></div>
+            </ion-select>
+          </ion-item>
+          <br><ion-label><h2><b>Time</b></h2></ion-label><br>
+          <ion-item>
+            <ion-label>Hour</ion-label>
+            <ion-select placeholder = "Select Hour" [(ngModel)] = "watchListInp['hour']">
+              <ion-select-option value="Unspecified">Unspecified</ion-select-option>
+              <div *ngFor = "let t of datetimeInp['hour']"><ion-select-option value="{{t}}">{{t}}</ion-select-option></div>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label>Minutes</ion-label>
+            <ion-select placeholder = "Select Minutes" [(ngModel)] = "watchListInp['minutes']">
+              <ion-select-option value="Unspecified">Unspecified</ion-select-option>
+              <div *ngFor = "let t of datetimeInp['minutes']"><ion-select-option value="{{t}}">{{t}}</ion-select-option></div>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+        <br>
+        <ion-button expand="block" fill="outline" (click) = "insertWatchList()">Insert WatchList</ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+
+  <ion-card *ngIf = "SGbool">
+    <ion-card-header>
+      <ion-label>
+        <h1>
+          <b>Game Option</b>
+        </h1>
+      </ion-label>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-label><b>Winner: </b>{{winnerInput}}</ion-label><br>
+      <ion-label><b>Opening: </b>{{openingChoice}}</ion-label><br>
+      <ion-label><b>Level: </b>{{level}}</ion-label><br><br>
+      <ion-button expand="block" fill="outline" (click) = "getData()">Search</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf = "SGbool && shownSelector">
+    <ion-card-header>
+      <ion-label>
+        <h1>
+          <b>Select Winner</b>
+        </h1>
+      </ion-label>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-list>
+
+        <ion-item>
+          <ion-label>Winner</ion-label>
+          <ion-select placeholder = "Select winner" [(ngModel)] = "winnerInput">
+            <ion-select-option value="White">White</ion-select-option>
+            <ion-select-option value="Black">Black</ion-select-option>
+            <ion-select-option value="Draw">Draw</ion-select-option>
+            <ion-select-option value="Any">Any</ion-select-option>
+          </ion-select>
+        </ion-item>
+      
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf = "SGbool && shownSelector">
+    <ion-card-header>
+      <ion-label>
+        <h1>
+          <b>Select Opening</b>
+        </h1>
+      </ion-label>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-input placeholder="Enter Opening" [(ngModel)] = "openingInput"></ion-input>
+      <ion-button expand="block" fill="outline" (click) = "getOpening()">Search opening</ion-button>
+
+      <ion-list>
+
+        <ion-item>
+          <ion-label>Opening</ion-label>
+          <ion-select placeholder = "Select results" [(ngModel)] = "openingChoice">
+            <ion-select-option value="Any">Any</ion-select-option>
+            <div *ngFor = "let t of openingListData">
+              <ion-select-option value={{t.opening_name}}>{{t.opening_name}}</ion-select-option>
+            </div>
+          </ion-select>
+        </ion-item>
+      
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf = "SGbool && shownSelector">
+    <ion-card-header>
+      <ion-label>
+        <h1>
+          <b>Select level</b>
+        </h1>
+        <br>A game is considered at a certain level if one or more player is rated inside the rate range of that level.<br>
+      </ion-label>
+    </ion-card-header>
+    
+    <ion-card-content>
+        
+      <ion-list>
+
+        <ion-item>
+          <ion-label>Rate</ion-label>
+          <ion-select placeholder = "Select results" [(ngModel)] = "level">
+            <ion-select-option value="Any">Any</ion-select-option>
+            <ion-select-option value="Beginner">Beginner (Rate 0-1000)</ion-select-option>
+            <ion-select-option value="Intermediate">Intermediate (Rate 1000-2000)</ion-select-option>
+            <ion-select-option value="Expert">Expert (Rate 2000-3000)</ion-select-option>
+          </ion-select>
+        </ion-item>
+      
+      </ion-list>
+
+    </ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf = "SGbool && shownData">
+    <ion-card *ngFor = "let a of gameListData">
+      <ion-card-content>
+        <ion-label>
+          <b>Game ID: </b>{{a.game_id}} <br>
+          <b>Number of turns: </b>{{a.turns}} <br>
+          <b>Winner: </b> {{a.winner}} <br>
+          <b>Opening: </b> {{a.opening_fullname}} <br>
+          <b>Victory status: </b> {{a.victory_status}} <br>
+
+        </ion-label>
+        <ion-button expand="block" fill="outline" (click) = "getOneGame(a.game_id)">More Info</ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ion-card *ngIf = "OPDbool">
+    <ion-card-header>
+      <ion-label>
+        <h1>
+          <b>Select Opening</b>
+        </h1>
+      </ion-label>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-label>
+        Opening: {{openingChoice}}
+      </ion-label>
+      <ion-input placeholder="Enter Opening" [(ngModel)] = "openingInput"></ion-input>
+      <ion-button expand="block" fill="outline" (click) = "getOpening()">Search opening</ion-button>
+
+      <ion-list>
+
+        <ion-item>
+          <ion-label>Opening</ion-label>
+          <ion-select placeholder = "Select results" [(ngModel)] = "openingChoice">
+            <ion-select-option value="Any">Any</ion-select-option>
+            <div *ngFor = "let t of openingListData">
+              <ion-select-option value={{t.opening_name}}>{{t.opening_name}}</ion-select-option>
+            </div>
+          </ion-select>
+        </ion-item>
+      
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card [hidden] = "!OPDbool">
+    <ion-card-header>
+      <ion-label><h1><b>Data Visualization</b></h1></ion-label>
+    </ion-card-header>
+    <ion-card-content>
+      <canvas #doughnutCanvas style="position: relative; height:20vh; width:40vw"></canvas><br>
+      <ion-button expand="block" fill="outline" (click) = "displayOnChart('search')">Visualize chosen data</ion-button>
+      <br><ion-label><h1><b>Preset Data</b></h1></ion-label><br>
+      <ion-button expand="block" fill="outline" (click) = "displayOnChart('Black')">Top opening for Black</ion-button>
+      <ion-button expand="block" fill="outline" (click) = "displayOnChart('White')">Top opening for White</ion-button>
+    </ion-card-content>
+    
+  </ion-card>
+
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="getData($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more data...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+   <!-- <div id="container">
     <strong>Ready to create an app?</strong>
     <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+  </div> -->
 </ion-content>
